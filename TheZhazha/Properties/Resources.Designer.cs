@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TheZhazha.WinForms.Properties {
+namespace TheZhazha.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TheZhazha.WinForms.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TheZhazha.WinForms.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TheZhazha.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -60,10 +60,35 @@ namespace TheZhazha.WinForms.Properties {
             }
         }
         
-        internal static System.Drawing.Icon zhazha {
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS
+        ///    quots
+        ///    (
+        ///        chat VARCHAR NOT NULL,
+        ///        quot TEXT NOT NULL,
+        ///        user VARCHAR NOT NULL,
+        ///        date VARCHAR NOT NULL
+        ///    );
+        ///
+        ///CREATE TABLE IF NOT EXISTS
+        ///    banned
+        ///    (
+        ///        user VARCHAR UNIQUE NOT NULL,
+        ///        date VARCHAR NOT NULL,
+        ///        reason VARCHAR NOT NULL,
+        ///        chat VARCHAR NOT NULL
+        ///    );
+        ///
+        ///CREATE TABLE IF NOT EXISTS
+        ///    warnings
+        ///    (
+        ///        user VARCHAR NOT NULL,
+        ///        chat VARCHAR NOT NULL,
+        ///        date VARCHAR NOT N [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CreateTables {
             get {
-                object obj = ResourceManager.GetObject("zhazha", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
+                return ResourceManager.GetString("CreateTables", resourceCulture);
             }
         }
     }

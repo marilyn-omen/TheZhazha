@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Windows.Forms;
 using Shock.Logger;
+using System.Drawing;
 
 namespace TheZhazha.WinForms
 {
     static class Program
     {
+        private static NotifyIcon _icon;
+
         [STAThread]
         static void Main()
         {
@@ -15,7 +18,32 @@ namespace TheZhazha.WinForms
             AppDomain.CurrentDomain.UnhandledException += OnCurrentDomainUnhandledException;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainWindow());
+
+            var menu = new ContextMenu();
+            menu.MenuItems.Add(new MenuItem("E&xit", OnExitMenuItemClick));
+
+            _icon = new NotifyIcon();
+            _icon.Icon = Properties.Resources.zhazha;
+            _icon.Text = "Zhazha is watching you";
+            _icon.ContextMenu = menu;
+            _icon.Visible = true;
+
+            Zhazha.Manager.StatusChanged += (s, e) =>
+            {
+                _icon.Text = e.Argument;
+                _icon.BalloonTipText = e.Argument;
+                _icon.ShowBalloonTip(3000, "TheZhazha", e.Argument, ToolTipIcon.Info);
+            };
+
+            Zhazha.Start();
+            Application.Run();
+        }
+
+        private static void OnExitMenuItemClick(object sender, EventArgs e)
+        {
+            Zhazha.Stop();
+            _icon.Visible = false;
+            Application.Exit();
         }
 
         private static void OnCurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)

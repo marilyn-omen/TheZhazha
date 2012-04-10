@@ -89,14 +89,12 @@ namespace TheZhazha.Models
             }
             else if (message.Body.Equals(Quot.Suffix1) || message.Body.Equals(Quot.Suffix2))
             {
-                //Send(message.Chat, Storage.GetTodayQuots(message.ChatName));
-                Send(message.Chat, "Temporary disabled :)");
+                Send(message.Chat, Storage.GetTodayQuots(message.ChatName));
             }
             else if(Quot.IsQuotString(message.Body))
             {
                 // quote
-                // ProcessQuot(message);
-                Send(message.Chat, "Temporary disabled :)");
+                ProcessQuot(message);
             }
             else if (Babka.Match(message.Body))
             {

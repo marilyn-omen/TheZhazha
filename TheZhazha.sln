@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheZhazha", "TheZhazha\TheZhazha.csproj", "{C3C07253-3AC7-4960-9BAC-B41FBB9C943D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheZhazha.WinForms", "TheZhazha.WinForms\TheZhazha.WinForms.csproj", "{8D1853D7-D84D-4073-8618-012E97461020}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{364FA4C9-ED9E-4D11-8776-F3613A27F6B9}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\Shock.Logger.dll = Lib\Shock.Logger.dll
+		Lib\Skype4COM.dll = Lib\Skype4COM.dll
+		Lib\System.Data.SQLite.dll = Lib\System.Data.SQLite.dll
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

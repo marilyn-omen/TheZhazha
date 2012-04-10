@@ -2,6 +2,8 @@
 using System.Data.SQLite;
 using System.Reflection;
 using System.Text;
+using System.IO;
+using System.Resources;
 
 namespace TheZhazha.Data
 {
@@ -9,7 +11,7 @@ namespace TheZhazha.Data
     {
         #region Constants
 
-        private const string _connectionString = @"data source={0}\TheZhazha.db";
+        private const string _dbFileName = "TheZhazha.db";
         private const string _dateFormat = "yyyy-MM-dd HH:mm:ss";
 
         #endregion
@@ -164,12 +166,25 @@ namespace TheZhazha.Data
         private static void PrepareConnection()
         {
             _connection = new SQLiteConnection(GetConnectionString());
+            ValidateTables();
+        }
+
+        private static void ValidateTables()
+        {
+            var cmd = new SQLiteCommand(Properties.Resources.CreateTables);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var trans = _connection.BeginTransaction();
+            cmd.ExecuteNonQuery();
+            trans.Commit();
+            cmd.Dispose();
+            _connection.Close();
         }
 
         private static string GetConnectionString()
         {
             var path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            return string.Format(_connectionString, path);
+            return string.Format(@"data source={0}\{1}", path, _dbFileName);
         }
 
         #endregion

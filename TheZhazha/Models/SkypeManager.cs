@@ -9,18 +9,22 @@ namespace TheZhazha.Models
     {
         #region Fields
 
-        private readonly Skype _skype;
+        private Skype _skype;
         private readonly IMessageProcessor _messageProcessor;
-        private bool _isListening;
         private readonly CancellationTokenSource _tokenSource;
+        private bool _isStartingListening;
+        private bool _isListening;
+
+        #endregion
+
+        #region Events
+
+        public ChangedEventHandler<string> StatusChanged;
 
         #endregion
 
         public SkypeManager()
         {
-            _skype = new Skype();
-            _skype.Attach();
-
             _tokenSource = new CancellationTokenSource();
             _messageProcessor = new MessageProcessor();
             _messageProcessor.MoodChanged += OnMoodChanged;
@@ -28,7 +32,8 @@ namespace TheZhazha.Models
 
         private void OnMoodChanged(object sender, MoodChangedEventArgs e)
         {
-            _skype.CurrentUserProfile.MoodText = e.Mood;
+            if (_isListening)
+                _skype.CurrentUserProfile.MoodText = e.Mood;
         }
 
         private void OnSkypeMessageStatus(ChatMessage pMessage, TChatMessageStatus status)
@@ -39,28 +44,65 @@ namespace TheZhazha.Models
 
         public void StartListening()
         {
-            if(!_isListening)
+            if (!_isListening && !_isStartingListening)
             {
-                _isListening = true;
-                var ct = _tokenSource.Token;
-                Task.Factory.StartNew(
-                    () =>
-                        {
-                            _skype.MessageStatus += OnSkypeMessageStatus;
-                            while (!ct.IsCancellationRequested)
-                            {
-                                Thread.Sleep(500);
-                            }
-                            _skype.MessageStatus -= OnSkypeMessageStatus;
-                        },
-                    ct);
+                _isStartingListening = true;
+                _skype = new Skype();
+
+                if (!_skype.Client.IsRunning)
+                {
+                    _skype.Client.Start(false, false);
+                    Thread.Sleep(5000);
+                }
+
+                ((_ISkypeEvents_Event)_skype).AttachmentStatus += OnSkypeManagerAttachmentStatus;
+                _skype.Attach(9, false);
+            }
+        }
+
+        private void OnSkypeManagerAttachmentStatus(TAttachmentStatus status)
+        {
+            switch (status)
+            {
+                case TAttachmentStatus.apiAttachSuccess:
+                    _skype.MessageStatus += OnSkypeMessageStatus;
+                    _isListening = true;
+                    _isStartingListening = false;
+                    OnStatusChanged("Connected");
+                    break;
+                case TAttachmentStatus.apiAttachPendingAuthorization:
+                    OnStatusChanged("Waiting for authorization");
+                    break;
+                case TAttachmentStatus.apiAttachNotAvailable:
+                case TAttachmentStatus.apiAttachUnknown:
+                    OnStatusChanged("Connection failed");
+                    break;
+                case TAttachmentStatus.apiAttachRefused:
+                    OnStatusChanged("Refused by client");
+                    break;
+            }
+        }
+
+        private void OnStatusChanged(string status)
+        {
+            var handler = StatusChanged;
+            if (handler != null)
+            {
+                handler(this, new ChangedEventArgs<string>(status));
             }
         }
 
         public void StopListening()
         {
-            _tokenSource.Cancel();
-            _isListening = false;
+            if (_isListening)
+            {
+                ((_ISkypeEvents_Event)_skype).AttachmentStatus += OnSkypeManagerAttachmentStatus;
+                _skype.MessageStatus -= OnSkypeMessageStatus;
+                // Seems like Skype4Com API doesn't have any Detach() method
+                _skype = null;
+                _isListening = false;
+                _isStartingListening = false;
+            }
         }
     }
 }
