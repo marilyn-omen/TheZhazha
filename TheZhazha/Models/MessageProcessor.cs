@@ -7,6 +7,7 @@ using SKYPE4COMLib;
 using TheZhazha.Data;
 using TheZhazha.Events;
 using TheZhazha.Utils;
+using Shock.Logger;
 
 namespace TheZhazha.Models
 {
@@ -82,7 +83,8 @@ namespace TheZhazha.Models
             if (DateTime.Now.Subtract(message.Timestamp) > TimeSpan.FromMinutes(5))
                 return;
 
-            if(message.Body.StartsWith("@"))
+            if(message.Body.StartsWith("@")
+                || message.Body.TrimStart().StartsWith("@"))
             {
                 // command
                 ProcessCommand(message);
@@ -137,7 +139,8 @@ namespace TheZhazha.Models
                     break;
                 case TChatMessageType.cmeSaid:
                 case TChatMessageType.cmeEmoted:
-                    Respond(message);
+                    if (Zhazha.IsEnabled)
+                        Respond(message);
                     break;
             }
         }
@@ -175,23 +178,136 @@ namespace TheZhazha.Models
 
         private void ProcessCommand(ChatMessage message)
         {
-            if (!message.Body.StartsWith("@") || message.Body.Length <= 1)
+            var s = message.Body.Trim().ToLowerInvariant();
+            if (!s.StartsWith("@") || s.Length <= 1)
                 return;
 
-            var cmd = message.Body.Substring(1).Trim().ToLowerInvariant();
+            s = s.TrimStart(new[] { '@' });
+            var parts = s.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts == null || parts.Length == 0)
+                return;
+
+            var cmd = parts[0];
+            var args = new string[parts.Length - 1];
+            for (var i = 0; i < parts.Length - 1; i++)
+            {
+                args[i] = parts[i + 1];
+            }
+
+            IChatMember member;
+
             switch (cmd)
             {
-                case Commands.CmdGameNews:
-                    GameNews.Load(response => Send(message.Chat, response));
-                    break;
-                case Commands.CmdSiske:
+                //case Commands.GameNews:
+                //GameNews.Load(response => Send(message.Chat, response));
+                //break;
+                case Commands.Siske:
                     Siske.Load(response => Send(message.Chat, response));
                     break;
-                case Commands.CmdGenerate:
+                case Commands.Generate:
                     if (_textGenerator != null
                         && _textGenerator.IsReady)
                     {
                         Send(message.Chat, _textGenerator.GenerateDeep());
+                    }
+                    break;
+                case Commands.Disable:
+                    if (Zhazha.IsEnabled && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    {
+                        Send(message.Chat, "Все, молчу, молчу! :x");
+                        Zhazha.IsEnabled = false;
+                    }
+                    break;
+                case Commands.Enable:
+                    if (!Zhazha.IsEnabled && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    {
+                        Send(message.Chat, "Спасибо, солнышко, я так соскучилась :*");
+                        Zhazha.IsEnabled = true;
+                    }
+                    break;
+                case Commands.Admin:
+                    if (args.Length == 2 && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    {
+                        switch (args[0])
+                        {
+                            case Commands.Type.Add:
+                                if (!Storage.IsUserAdmin(args[1], message.ChatName))
+                                {
+                                    Storage.AddAdmin(args[1], message.ChatName);
+                                    Send(message.Chat, string.Format("Пользователь {0} добавлен в администраторы.", args[1]));
+                                }
+                                else
+                                {
+                                    Send(message.Chat, string.Format("Пользователь {0} уже имеет права администратора.", args[1]));
+                                }
+                                break;
+                            case Commands.Type.Remove:
+                                if (Storage.IsUserAdmin(args[1], message.ChatName))
+                                {
+                                    Storage.RemoveAdmin(args[1], message.ChatName);
+                                    Send(message.Chat, string.Format("{0} мне больше не указ, какая досада! (rofl)", args[1]));
+                                }
+                                else
+                                {
+                                    Send(message.Chat, string.Format("Администратор с логином {0} не найден.", args[1]));
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case Commands.Admins:
+                    Send(message.Chat, Storage.GetAdmins(message.ChatName));
+                    break;
+                case Commands.Mute:
+                    if (args.Length == 2 && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    {
+                        member = SkypeUtils.GetChatMemberByHandler(message.Chat, args[1]);
+                        if (member != null)
+                        {
+                            switch (args[0])
+                            {
+                                case Commands.Type.On:
+                                    member.Role = TChatMemberRole.chatMemberRoleListener;
+                                    Send(message.Chat, string.Format("Заткнись, {0}!", args[1]));
+                                    break;
+                                case Commands.Type.Off:
+                                    member.Role = TChatMemberRole.chatMemberRoleUser;
+                                    Send(message.Chat, string.Format("{0} может говорить.", args[1]));
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Send(message.Chat, "Пользователь с таким логином в чате не найден.");
+                        }
+                    }
+                    break;
+                case Commands.Promote:
+                    if (args.Length == 1 && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    {
+                        member = SkypeUtils.GetChatMemberByHandler(message.Chat, args[0]);
+                        if (member != null)
+                        {
+                            member.Role = TChatMemberRole.chatMemberRoleMaster;
+                        }
+                        else
+                        {
+                            Send(message.Chat, "Пользователь с таким логином в чате не найден.");
+                        }
+                    }
+                    break;
+                case Commands.Demote:
+                    if (args.Length == 1 && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    {
+                        member = SkypeUtils.GetChatMemberByHandler(message.Chat, args[0]);
+                        if (member != null)
+                        {
+                            member.Role = TChatMemberRole.chatMemberRoleUser;
+                        }
+                        else
+                        {
+                            Send(message.Chat, "Пользователь с таким логином в чате не найден.");
+                        }
                     }
                     break;
                 default:

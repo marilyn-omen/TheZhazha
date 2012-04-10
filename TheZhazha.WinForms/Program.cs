@@ -20,7 +20,8 @@ namespace TheZhazha.WinForms
             Application.SetCompatibleTextRenderingDefault(false);
 
             var menu = new ContextMenu();
-            menu.MenuItems.Add(new MenuItem("E&xit", OnExitMenuItemClick));
+            menu.MenuItems.Add(new MenuItem("Set master handle", OnMasterMenuItemClick));
+            menu.MenuItems.Add(new MenuItem("Exit", OnExitMenuItemClick));
 
             _icon = new NotifyIcon();
             _icon.Icon = Properties.Resources.zhazha;
@@ -37,6 +38,16 @@ namespace TheZhazha.WinForms
 
             Zhazha.Start();
             Application.Run();
+        }
+
+        private static void OnMasterMenuItemClick(object sender, EventArgs e)
+        {
+            var handleForm = new SetMasterHandleForm();
+            handleForm.MasterHandle = Zhazha.MasterHandle;
+            if (handleForm.ShowDialog() == DialogResult.OK)
+            {
+                Zhazha.MasterHandle = handleForm.MasterHandle;
+            }
         }
 
         private static void OnExitMenuItemClick(object sender, EventArgs e)

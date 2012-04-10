@@ -10,7 +10,7 @@
 CREATE TABLE IF NOT EXISTS
     banned
     (
-        user VARCHAR UNIQUE NOT NULL,
+        user VARCHAR NOT NULL,
         date VARCHAR NOT NULL,
         reason VARCHAR NOT NULL,
         chat VARCHAR NOT NULL
@@ -23,4 +23,11 @@ CREATE TABLE IF NOT EXISTS
         chat VARCHAR NOT NULL,
         date VARCHAR NOT NULL,
         reason VARCHAR NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS
+    admins
+    (
+        user VARCHAR NOT NULL,
+        chat VARCHAR NOT NULL
     );

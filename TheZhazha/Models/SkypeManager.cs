@@ -51,7 +51,7 @@ namespace TheZhazha.Models
 
                 if (!_skype.Client.IsRunning)
                 {
-                    _skype.Client.Start(false, false);
+                    _skype.Client.Start(true, true);
                     Thread.Sleep(5000);
                 }
 

@@ -161,6 +161,81 @@ namespace TheZhazha.Data
 
         #endregion
 
+        #region Admin
+
+        public static bool IsUserAdmin(string userHandle, string chat)
+        {
+            const string sql = "select user from admins where user=@user and chat=@chat";
+            var cmd = new SQLiteCommand(sql);
+            cmd.Parameters.AddWithValue("@user", userHandle);
+            cmd.Parameters.AddWithValue("@chat", chat);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var res = cmd.ExecuteScalar();
+            cmd.Dispose();
+            _connection.Close();
+            return res != null;
+        }
+
+        public static void AddAdmin(string userHandle, string chat)
+        {
+            const string sql = "insert into admins (user, chat) values (@user, @chat)";
+            var cmd = new SQLiteCommand(sql);
+            cmd.Parameters.AddWithValue("@user", userHandle);
+            cmd.Parameters.AddWithValue("@chat", chat);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var trans = _connection.BeginTransaction();
+            cmd.ExecuteNonQuery();
+            trans.Commit();
+            cmd.Dispose();
+            _connection.Close();
+        }
+
+        public static void RemoveAdmin(string userHandle, string chat)
+        {
+            const string sql = "delete from admins where user=@user and chat=@chat";
+            var cmd = new SQLiteCommand(sql);
+            cmd.Parameters.AddWithValue("@user", userHandle);
+            cmd.Parameters.AddWithValue("@chat", chat);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var trans = _connection.BeginTransaction();
+            cmd.ExecuteNonQuery();
+            trans.Commit();
+            cmd.Dispose();
+            _connection.Close();
+        }
+
+        public static string GetAdmins(string chat)
+        {
+            const string sql = "select user from admins where chat=@chat";
+            var result = new StringBuilder();
+            var cmd = new SQLiteCommand(sql);
+            cmd.Parameters.AddWithValue("@chat", chat);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Append(reader.GetString(0));
+                result.Append(Environment.NewLine);
+            }
+            cmd.Dispose();
+            _connection.Close();
+            if (result.Length == 0)
+            {
+                result.Append("Нету админов, понел.");
+            }
+            else
+            {
+                result.Insert(0, string.Format("Администраторы:{0}", Environment.NewLine));
+            }
+            return result.ToString();
+        }
+
+        #endregion
+
         #region Private methods
 
         private static void PrepareConnection()

@@ -1,4 +1,6 @@
-﻿using SKYPE4COMLib;
+﻿using System.Linq;
+using SKYPE4COMLib;
+using TheZhazha.Data;
 
 namespace TheZhazha.Utils
 {
@@ -12,6 +14,24 @@ namespace TheZhazha.Utils
                 name = user.Handle;
             }
             return name;
+        }
+
+        public static bool IsUserAdmin(string userHandle, string chat)
+        {
+            if (string.IsNullOrEmpty(userHandle) || string.IsNullOrEmpty(chat))
+                return false;
+
+            return userHandle.Equals(Zhazha.MasterHandle) || Storage.IsUserAdmin(userHandle, chat);
+        }
+
+        public static IUser GetChatUserByHandler(IChat chat, string handler)
+        {
+            return chat.Members.Cast<IUser>().FirstOrDefault(user => user.Handle == handler);
+        }
+
+        public static IChatMember GetChatMemberByHandler(IChat chat, string handler)
+        {
+            return chat.MemberObjects.Cast<IChatMember>().FirstOrDefault(user => user.Handle == handler);
         }
     }
 }

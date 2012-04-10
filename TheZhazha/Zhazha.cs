@@ -5,6 +5,9 @@ namespace TheZhazha
 {
     public static class Zhazha
     {
+        public static string MasterHandle { get; set; }
+        public static bool IsEnabled { get; set; }
+
         public static SkypeManager Manager
         {
             get { return _skypeMgr; }
@@ -19,6 +22,7 @@ namespace TheZhazha
             if (_skypeMgr == null)
                 _skypeMgr = new SkypeManager();
             Rnd = new Random();
+            IsEnabled = true;
         }
 
         public static void Start()
