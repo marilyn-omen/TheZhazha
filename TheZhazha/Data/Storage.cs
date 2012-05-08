@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Text;
 using System.IO;
 using System.Resources;
+using TheZhazha.Models;
+using System.Collections.Generic;
 
 namespace TheZhazha.Data
 {
@@ -232,6 +234,94 @@ namespace TheZhazha.Data
                 result.Insert(0, string.Format("Администраторы:{0}", Environment.NewLine));
             }
             return result.ToString();
+        }
+
+        #endregion
+
+        #region Statistic
+
+        public static List<StatsEntry> GetAllStats()
+        {
+            var result = new List<StatsEntry>();
+            const string sql = "select * from stats";
+            var cmd = new SQLiteCommand(sql);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(new StatsEntry(
+                    reader.GetString(reader.GetOrdinal("chat")),
+                    reader.GetString(reader.GetOrdinal("user")),
+                    reader.GetInt64(reader.GetOrdinal("id")))
+                    {
+                        Messages = reader.GetInt64(reader.GetOrdinal("messages")),
+                        Words = reader.GetInt64(reader.GetOrdinal("words")),
+                        Symbols = reader.GetInt64(reader.GetOrdinal("symbols")),
+                        Commands = reader.GetInt64(reader.GetOrdinal("commands")),
+                        Started = DateTime.Parse(reader.GetString(reader.GetOrdinal("started"))),
+                    });
+            }
+            cmd.Dispose();
+            _connection.Close();
+            return result;
+        }
+
+        public static void UpdateStats(StatsEntry entry)
+        {
+            const string insertSql = "insert into stats (chat, user, started, updated, messages, words, symbols, commands) values (@chat, @user, @started, @updated, @messages, @words, @symbols, @commands)";
+            const string updateSql = "update stats set updated=@updated, messages=@messages, words=@words, symbols=@symbols, commands=@commands where id=@id";
+            const string getIdSql = "select last_insert_rowid() from stats";
+            var now = DateTime.Now.ToString(_dateFormat);
+            var cmd = new SQLiteCommand();
+
+            // insert new stats entry
+            if (entry.Id == 0)
+            {
+                cmd.CommandText = insertSql;
+                cmd.Parameters.AddWithValue("@chat", entry.Chat);
+                cmd.Parameters.AddWithValue("@user", entry.User);
+                cmd.Parameters.AddWithValue("@started", now);
+                cmd.Parameters.AddWithValue("@updated", now);
+                cmd.Parameters.AddWithValue("@messages", entry.Messages);
+                cmd.Parameters.AddWithValue("@words", entry.Words);
+                cmd.Parameters.AddWithValue("@symbols", entry.Symbols);
+                cmd.Parameters.AddWithValue("@commands", entry.Commands);
+
+                cmd.Connection = _connection;
+                _connection.Open();
+                
+                var trans = _connection.BeginTransaction();
+                var res = cmd.ExecuteScalar();
+                trans.Commit();
+
+                cmd.CommandText = getIdSql;
+                entry.SetId((long)cmd.ExecuteScalar());
+
+                cmd.Dispose();
+                _connection.Close();
+            }
+            // update existing stats entry
+            else
+            {
+                cmd.CommandText = updateSql;
+                cmd.Parameters.AddWithValue("@updated", now);
+                cmd.Parameters.AddWithValue("@messages", entry.Messages);
+                cmd.Parameters.AddWithValue("@words", entry.Words);
+                cmd.Parameters.AddWithValue("@symbols", entry.Symbols);
+                cmd.Parameters.AddWithValue("@commands", entry.Commands);
+                cmd.Parameters.AddWithValue("@id", entry.Id);
+
+                cmd.Connection = _connection;
+                _connection.Open();
+                var trans = _connection.BeginTransaction();
+                cmd.ExecuteNonQuery();
+                trans.Commit();
+                cmd.Dispose();
+                _connection.Close();
+            }
+
+            
         }
 
         #endregion

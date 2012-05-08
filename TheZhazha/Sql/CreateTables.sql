@@ -31,3 +31,17 @@ CREATE TABLE IF NOT EXISTS
         user VARCHAR NOT NULL,
         chat VARCHAR NOT NULL
     );
+
+CREATE TABLE IF NOT EXISTS
+    stats
+    (
+        id INTEGER PRIMARY KEY,
+        user VARCHAR NOT NULL,
+        chat VARCHAR NOT NULL,
+        started VARCHAR NOT NULL,
+        updated VARCHAR NOT NULL,
+        messages INTEGER NOT NULL,
+        words INTEGER NOT NULL,
+        symbols INTEGER NOT NULL,
+        commands INTEGER NOT NULL
+    );

@@ -80,6 +80,8 @@ namespace TheZhazha.Models
 
         private void Process(ChatMessage message)
         {
+            StatsManager.Instance.ProcessMessage(message);
+
             if (DateTime.Now.Subtract(message.Timestamp) > TimeSpan.FromMinutes(5))
                 return;
 
@@ -315,6 +317,9 @@ namespace TheZhazha.Models
                     break;
                 case Commands.Diablo3:
                     Send(message.Chat, Diablo3.GetTimeLeftStr());
+                    break;
+                case Commands.Statistic:
+                    Send(message.Chat, StatsManager.Instance.GetStatistic(message.ChatName));
                     break;
                 default:
                     Send(message.Chat, "Неизвестная команда.");
