@@ -59,6 +59,7 @@
     <Compile Include="Events\SendMessageEvent.cs" />
     <Compile Include="Models\Babka.cs" />
     <Compile Include="Models\Commands.cs" />
+    <Compile Include="Models\Diablo3.cs" />
     <Compile Include="Models\IMessageProcessor.cs" />
     <Compile Include="Models\MarkovChain.cs" />
     <Compile Include="Models\MarkovChainDeep.cs" />

@@ -15,6 +15,7 @@ namespace TheZhazha.Models
         public const string Mute = "mute";
         public const string Promote = "promote";
         public const string Demote = "demote";
+        public const string Diablo3 = "d3";
 
         public static class Type
         {

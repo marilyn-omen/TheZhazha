@@ -313,6 +313,9 @@ namespace TheZhazha.Models
                         }
                     }
                     break;
+                case Commands.Diablo3:
+                    Send(message.Chat, Diablo3.GetTimeLeftStr());
+                    break;
                 default:
                     Send(message.Chat, "Неизвестная команда.");
                     break;
