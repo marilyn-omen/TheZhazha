@@ -201,6 +201,9 @@ namespace TheZhazha.Models
                 //case Commands.GameNews:
                 //GameNews.Load(response => Send(message.Chat, response));
                 //break;
+                case Commands.Help:
+                    Send(message.Chat, Commands.ToString());
+                    break;
                 case Commands.Siske:
                     Siske.Load(response => Send(message.Chat, response));
                     break;

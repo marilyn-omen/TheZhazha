@@ -47,17 +47,31 @@ namespace TheZhazha.Models
             if (!_isListening && !_isStartingListening)
             {
                 _isStartingListening = true;
-                _skype = new Skype();
-
-                if (!_skype.Client.IsRunning)
-                {
-                    _skype.Client.Start(true, true);
-                    Thread.Sleep(5000);
-                }
-
-                ((_ISkypeEvents_Event)_skype).AttachmentStatus += OnSkypeManagerAttachmentStatus;
-                _skype.Attach(9, false);
+                TryAttach();
             }
+        }
+
+        private void TryAttach()
+        {
+            _skype = new Skype();
+
+            if (!_skype.Client.IsRunning)
+            {
+                OnStatusChanged("Starting Skype");
+                _skype.Client.Start(false, false);
+                Thread.Sleep(10000);
+                // TODO: move attach process to background thread
+            }
+
+            ((_ISkypeEvents_Event)_skype).AttachmentStatus += OnSkypeManagerAttachmentStatus;
+            _skype.Attach(9, false);
+        }
+
+        private void RetryAttach()
+        {
+            ((_ISkypeEvents_Event)_skype).AttachmentStatus -= OnSkypeManagerAttachmentStatus;
+            _skype = null;
+            TryAttach();
         }
 
         private void OnSkypeManagerAttachmentStatus(TAttachmentStatus status)
@@ -75,7 +89,10 @@ namespace TheZhazha.Models
                     break;
                 case TAttachmentStatus.apiAttachNotAvailable:
                 case TAttachmentStatus.apiAttachUnknown:
-                    OnStatusChanged("Connection failed");
+                    OnStatusChanged("Connection failed, retrying in 10 seconds...");
+                    Thread.Sleep(10000);
+                    // TODO: move attach process to background thread
+                    RetryAttach();
                     break;
                 case TAttachmentStatus.apiAttachRefused:
                     OnStatusChanged("Refused by client");
@@ -96,7 +113,7 @@ namespace TheZhazha.Models
         {
             if (_isListening)
             {
-                ((_ISkypeEvents_Event)_skype).AttachmentStatus += OnSkypeManagerAttachmentStatus;
+                ((_ISkypeEvents_Event)_skype).AttachmentStatus -= OnSkypeManagerAttachmentStatus;
                 _skype.MessageStatus -= OnSkypeMessageStatus;
                 // Seems like Skype4Com API doesn't have any Detach() method
                 _skype = null;
