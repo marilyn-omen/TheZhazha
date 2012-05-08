@@ -7,7 +7,7 @@ namespace TheZhazha.Models
 {
     public static class Diablo3
     {
-        private static readonly DateTime _releaseTime = new DateTime(2012, 5, 15);
+        private static readonly DateTime _releaseTime = new DateTime(2012, 5, 15, 1, 0, 0);
 
         public static TimeSpan GetTimeLeft()
         {
