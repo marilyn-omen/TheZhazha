@@ -29,7 +29,7 @@ namespace TheZhazha.Models
         #region Fields
 
         //                 chat               user    stat
-        private Dictionary<string, Dictionary<string, StatsEntry>> _entries;
+        private readonly Dictionary<string, Dictionary<string, StatsEntry>> _entries;
 
         #endregion
 

@@ -66,6 +66,7 @@
     <Compile Include="Models\MessageProcessor.cs" />
     <Compile Include="Models\QuoteGenerator.cs" />
     <Compile Include="Models\QuotesLoader.cs" />
+    <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Siske.cs" />
     <Compile Include="Models\SkypeManager.cs" />
     <Compile Include="Models\GameNews.cs" />

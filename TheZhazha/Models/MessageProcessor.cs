@@ -100,7 +100,8 @@ namespace TheZhazha.Models
                 // quote
                 ProcessQuot(message);
             }
-            else if (Babka.Match(message.Body))
+            else if (Settings.Instance.Get(message.ChatName).IsBabkaEnabled
+                && Babka.Match(message.Body))
             {
                 string response;
                 var kick = Babka.ProcessMessage(message, out response);
@@ -141,8 +142,7 @@ namespace TheZhazha.Models
                     break;
                 case TChatMessageType.cmeSaid:
                 case TChatMessageType.cmeEmoted:
-                    if (Zhazha.IsEnabled)
-                        Respond(message);
+                    Respond(message);
                     break;
             }
         }
@@ -217,17 +217,61 @@ namespace TheZhazha.Models
                     }
                     break;
                 case Commands.Disable:
-                    if (Zhazha.IsEnabled && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    if (!SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                        break;
+                    if (args.Length > 0)
+                    {
+                        switch (args[0])
+                        {
+                            case "vbros":
+                                if (Settings.Instance.Get(message.ChatName).IsVbrosEnabled)
+                                {
+                                    Send(message.Chat, "XYNTA MODE OFF");
+                                    Settings.Instance.Get(message.ChatName).IsVbrosEnabled = false;
+                                }
+                                break;
+                            case "babka":
+                                if (Settings.Instance.Get(message.ChatName).IsBabkaEnabled)
+                                {
+                                    Send(message.Chat, "BABKA IS OFFLINE");
+                                    Settings.Instance.Get(message.ChatName).IsBabkaEnabled = false;
+                                }
+                                break;
+                        }
+                    }
+                    if (Settings.Instance.Get(message.ChatName).IsReplyEnabled)
                     {
                         Send(message.Chat, "Все, молчу, молчу! :x");
-                        Zhazha.IsEnabled = false;
+                        Settings.Instance.Get(message.ChatName).IsReplyEnabled = false;
                     }
                     break;
                 case Commands.Enable:
-                    if (!Zhazha.IsEnabled && SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                    if (!SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
+                        break;
+                    if (args.Length > 0)
+                    {
+                        switch (args[0])
+                        {
+                            case "vbros":
+                                if (!Settings.Instance.Get(message.ChatName).IsVbrosEnabled)
+                                {
+                                    Send(message.Chat, "Буллшит генератор включён!");
+                                    Settings.Instance.Get(message.ChatName).IsVbrosEnabled = true;
+                                }
+                                break;
+                            case "babka":
+                                if (!Settings.Instance.Get(message.ChatName).IsBabkaEnabled)
+                                {
+                                    Send(message.Chat, "Бабка следит за тобой, юзернейм.");
+                                    Settings.Instance.Get(message.ChatName).IsBabkaEnabled = true;
+                                }
+                                break;
+                        }
+                    }
+                    else if (!Settings.Instance.Get(message.ChatName).IsReplyEnabled)
                     {
                         Send(message.Chat, "Спасибо, солнышко, я так соскучилась :*");
-                        Zhazha.IsEnabled = true;
+                        Settings.Instance.Get(message.ChatName).IsReplyEnabled = true;
                     }
                     break;
                 case Commands.Admin:
@@ -333,7 +377,8 @@ namespace TheZhazha.Models
                 return;
 
             string response = null;
-            if(Zhazha.Rnd.NextDouble() < 0.001)
+            if(Settings.Instance.Get(message.ChatName).IsReplyEnabled
+                && Zhazha.Rnd.NextDouble() < 0.001)
             {
                 var name = message.FromDisplayName;
                 if(string.IsNullOrEmpty(name))
@@ -342,13 +387,14 @@ namespace TheZhazha.Models
                 }
                 response = string.Format("/topic {0} (c) {1}", message.Body, name);
             }
-            else if (Zhazha.Rnd.NextDouble() < 0.04
+            else if (Settings.Instance.Get(message.ChatName).IsVbrosEnabled
+                && Zhazha.Rnd.NextDouble() < 0.04
                 && _textGenerator != null
                 && _textGenerator.IsReady)
             {
                 response = _textGenerator.GenerateDeep();
             }
-            else
+            else if(Settings.Instance.Get(message.ChatName).IsReplyEnabled)
             {
                 foreach (var quoteGenerator in _quoteGenerators)
                 {

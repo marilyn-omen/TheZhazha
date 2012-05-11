@@ -45,3 +45,13 @@ CREATE TABLE IF NOT EXISTS
         symbols INTEGER NOT NULL,
         commands INTEGER NOT NULL
     );
+
+CREATE TABLE IF NOT EXISTS
+    settings
+    (
+        id INTEGER PRIMARY KEY,
+        chat VARCHAR NOT NULL,
+        reply INTEGER NOT NULL,
+        vbros INTEGER NOT NULL,
+        babka INTEGER NOT NULL
+    );

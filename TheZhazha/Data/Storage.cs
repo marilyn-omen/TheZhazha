@@ -33,12 +33,6 @@ namespace TheZhazha.Data
 
         #endregion
 
-        #region Properties
-
-
-
-        #endregion
-
         #region Quots
 
         public static void AddQuot(Quot quot, string chat)
@@ -274,6 +268,9 @@ namespace TheZhazha.Data
             const string getIdSql = "select last_insert_rowid() from stats";
             var now = DateTime.Now.ToString(_dateFormat);
             var cmd = new SQLiteCommand();
+            cmd.Connection = _connection;
+            _connection.Open();
+            var trans = _connection.BeginTransaction();
 
             // insert new stats entry
             if (entry.Id == 0)
@@ -288,18 +285,22 @@ namespace TheZhazha.Data
                 cmd.Parameters.AddWithValue("@symbols", entry.Symbols);
                 cmd.Parameters.AddWithValue("@commands", entry.Commands);
 
-                cmd.Connection = _connection;
-                _connection.Open();
-                
-                var trans = _connection.BeginTransaction();
-                var res = cmd.ExecuteScalar();
-                trans.Commit();
-
-                cmd.CommandText = getIdSql;
-                entry.SetId((long)cmd.ExecuteScalar());
-
-                cmd.Dispose();
-                _connection.Close();
+                try
+                {
+                    cmd.ExecuteScalar();
+                    trans.Commit();
+                    cmd.CommandText = getIdSql;
+                    entry.SetId((long)cmd.ExecuteScalar());
+                }
+                catch (Exception)
+                {
+                    entry.SetId(0);
+                }
+                finally
+                {
+                    _connection.Close();
+                    cmd.Dispose();
+                }
             }
             // update existing stats entry
             else
@@ -312,16 +313,107 @@ namespace TheZhazha.Data
                 cmd.Parameters.AddWithValue("@commands", entry.Commands);
                 cmd.Parameters.AddWithValue("@id", entry.Id);
 
-                cmd.Connection = _connection;
-                _connection.Open();
-                var trans = _connection.BeginTransaction();
-                cmd.ExecuteNonQuery();
-                trans.Commit();
-                cmd.Dispose();
-                _connection.Close();
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                    trans.Commit();
+                }
+                catch (Exception)
+                { }
+                finally
+                {
+                    _connection.Close();
+                    cmd.Dispose();
+                }
             }
+        }
 
-            
+        #endregion
+
+        #region Settings
+
+        public static List<SettingsEntry> GetAllSettings()
+        {
+            var result = new List<SettingsEntry>();
+            const string sql = "select * from settings";
+            var cmd = new SQLiteCommand(sql);
+            cmd.Connection = _connection;
+            _connection.Open();
+            var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(new SettingsEntry(
+                    reader.GetString(reader.GetOrdinal("chat")),
+                    reader.GetInt64(reader.GetOrdinal("id")))
+                {
+                    IsReplyEnabled = reader.GetBoolean(reader.GetOrdinal("reply")),
+                    IsVbrosEnabled = reader.GetBoolean(reader.GetOrdinal("vbros")),
+                    IsBabkaEnabled = reader.GetBoolean(reader.GetOrdinal("babka"))
+                });
+            }
+            cmd.Dispose();
+            _connection.Close();
+            return result;
+        }
+
+        public static void UpdateSettings(SettingsEntry entry)
+        {
+            const string insertSql = "insert into settings (chat, reply, vbros, babka) values (@chat, @reply, @vbros, @babka)";
+            const string updateSql = "update settings set reply=@reply, vbros=@vbros, babka=@babka where id=@id";
+            const string getIdSql = "select last_insert_rowid() from settings";
+            var cmd = new SQLiteCommand();
+            cmd.Connection = _connection;
+            _connection.Open();
+            var trans = _connection.BeginTransaction();
+
+            // insert new settings entry
+            if (entry.Id == 0)
+            {
+                cmd.CommandText = insertSql;
+                cmd.Parameters.AddWithValue("@chat", entry.Chat);
+                cmd.Parameters.AddWithValue("@reply", entry.IsReplyEnabled);
+                cmd.Parameters.AddWithValue("@vbros", entry.IsVbrosEnabled);
+                cmd.Parameters.AddWithValue("@babka", entry.IsBabkaEnabled);
+
+                try
+                {
+                    var res = cmd.ExecuteScalar();
+                    trans.Commit();
+                    cmd.CommandText = getIdSql;
+                    entry.SetId((long)cmd.ExecuteScalar());
+                }
+                catch (Exception)
+                {
+                    entry.SetId(0);
+                }
+                finally
+                {
+                    _connection.Close();
+                    cmd.Dispose();
+                }
+            }
+            // update existing settings entry
+            else
+            {
+                cmd.CommandText = updateSql;
+                cmd.Parameters.AddWithValue("@reply", entry.IsReplyEnabled);
+                cmd.Parameters.AddWithValue("@vbros", entry.IsVbrosEnabled);
+                cmd.Parameters.AddWithValue("@babka", entry.IsBabkaEnabled);
+                cmd.Parameters.AddWithValue("@id", entry.Id);
+
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                    trans.Commit();
+                }
+                catch (Exception)
+                { }
+                finally
+                {
+                    _connection.Close();
+                    cmd.Dispose();
+                }
+            }
         }
 
         #endregion
