@@ -209,13 +209,6 @@ namespace TheZhazha.Models
                 case Commands.Siske:
                     Siske.Load(response => Send(message.Chat, response));
                     break;
-                case Commands.Generate:
-                    if (_textGenerator != null
-                        && _textGenerator.IsReady)
-                    {
-                        Send(message.Chat, _textGenerator.GenerateDeep());
-                    }
-                    break;
                 case Commands.Disable:
                     if (!SkypeUtils.IsUserAdmin(message.Sender.Handle, message.ChatName))
                         break;
@@ -365,8 +358,23 @@ namespace TheZhazha.Models
                 case Commands.Statistic:
                     Send(message.Chat, StatsManager.Instance.GetStatistic(message.ChatName));
                     break;
+                case Commands.Generate:
+                    if (_textGenerator != null
+                        && _textGenerator.IsReady)
+                    {
+                        Send(message.Chat, _textGenerator.GenerateDeep());
+                    }
+                    break;
                 default:
-                    Send(message.Chat, "Неизвестная команда.");
+                    if (_textGenerator != null
+                        && _textGenerator.IsReady)
+                    {
+                        Send(message.Chat, _textGenerator.GenerateDeep());
+                    }
+                    else
+                    {
+                        Send(message.Chat, "Неизвестная команда.");
+                    }
                     break;
             }
         }
