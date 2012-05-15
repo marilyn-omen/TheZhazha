@@ -128,6 +128,14 @@ namespace TheZhazha.Models
             Id = id;
         }
 
+        public SettingsEntry(string chat, long id, bool reply, bool vbros, bool babka)
+            : this(chat, id)
+        {
+            _isReplyEnabled = reply;
+            _isVbrosEnabled = vbros;
+            _isBabkaEnabled = babka;
+        }
+
         public void SetId(long value)
         {
             Id = value;

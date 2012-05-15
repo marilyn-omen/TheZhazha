@@ -344,12 +344,11 @@ namespace TheZhazha.Data
             {
                 result.Add(new SettingsEntry(
                     reader.GetString(reader.GetOrdinal("chat")),
-                    reader.GetInt64(reader.GetOrdinal("id")))
-                {
-                    IsReplyEnabled = reader.GetBoolean(reader.GetOrdinal("reply")),
-                    IsVbrosEnabled = reader.GetBoolean(reader.GetOrdinal("vbros")),
-                    IsBabkaEnabled = reader.GetBoolean(reader.GetOrdinal("babka"))
-                });
+                    reader.GetInt64(reader.GetOrdinal("id")),
+                    reader.GetBoolean(reader.GetOrdinal("reply")),
+                    reader.GetBoolean(reader.GetOrdinal("vbros")),
+                    reader.GetBoolean(reader.GetOrdinal("babka")))
+                );
             }
             cmd.Dispose();
             _connection.Close();
