@@ -82,7 +82,7 @@ namespace TheZhazha.Models
         {
             StatsManager.Instance.ProcessMessage(message);
 
-            if (DateTime.Now.Subtract(message.Timestamp) > TimeSpan.FromMinutes(5))
+            if (DateTime.Now.Subtract(message.Timestamp) > TimeSpan.FromMinutes(1))
                 return;
 
             if(message.Body.StartsWith("@")
