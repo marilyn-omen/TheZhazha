@@ -41,6 +41,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\Shock.Logger.dll</HintPath>
     </Reference>
+    <Reference Include="Shock.MarkovTextGenerator">
+      <HintPath>..\Lib\Shock.MarkovTextGenerator.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite">

@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using SKYPE4COMLib;
+using Shock.MarkovTextGenerator;
 using TheZhazha.Data;
 using TheZhazha.Events;
 using TheZhazha.Utils;
@@ -18,7 +19,6 @@ namespace TheZhazha.Models
         private readonly Queue<ChatMessage> _messages;
         private readonly CancellationTokenSource _tokenSource;
         private readonly List<QuoteGenerator> _quoteGenerators;
-        private readonly TextGenerator _textGenerator;
 
         #endregion
 
@@ -45,8 +45,7 @@ namespace TheZhazha.Models
             _quoteGenerators =
                 QuotesLoader.GetGeneratorsList(
                     System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-            _textGenerator = new TextGenerator();
-
+            
             _messages = new Queue<ChatMessage>();
             _tokenSource = new CancellationTokenSource();
 
@@ -142,9 +141,15 @@ namespace TheZhazha.Models
                     break;
                 case TChatMessageType.cmeSaid:
                 case TChatMessageType.cmeEmoted:
+                    AccumulateDictionary(message);
                     Respond(message);
                     break;
             }
+        }
+
+        private void AccumulateDictionary(IChatMessage message)
+        {
+            Generator.FeedDictionary(SkypeUtils.GetFsSafeName(message.ChatName), message.Body);
         }
 
         private void ProcessQuot(ChatMessage message)
@@ -359,22 +364,10 @@ namespace TheZhazha.Models
                     Send(message.Chat, StatsManager.Instance.GetStatistic(message.ChatName));
                     break;
                 case Commands.Generate:
-                    if (_textGenerator != null
-                        && _textGenerator.IsReady)
-                    {
-                        Send(message.Chat, _textGenerator.GenerateDeep());
-                    }
+                    Send(message.Chat, SkypeUtils.ReturnSmilies(Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName))));
                     break;
                 default:
-                    if (_textGenerator != null
-                        && _textGenerator.IsReady)
-                    {
-                        Send(message.Chat, _textGenerator.GenerateDeep());
-                    }
-                    else
-                    {
-                        Send(message.Chat, "Неизвестная команда.");
-                    }
+                    Send(message.Chat, SkypeUtils.ReturnSmilies(Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName))));
                     break;
             }
         }
@@ -396,11 +389,9 @@ namespace TheZhazha.Models
                 response = string.Format("/topic {0} (c) {1}", message.Body, name);
             }
             else if (Settings.Instance.Get(message.ChatName).IsVbrosEnabled
-                && Zhazha.Rnd.NextDouble() < 0.04
-                && _textGenerator != null
-                && _textGenerator.IsReady)
+                && Zhazha.Rnd.NextDouble() < 0.04)
             {
-                response = _textGenerator.GenerateDeep();
+                response = Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName));
             }
             else if(Settings.Instance.Get(message.ChatName).IsReplyEnabled)
             {

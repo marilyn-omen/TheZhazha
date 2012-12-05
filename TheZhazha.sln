@@ -8,6 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{364FA4C9-ED9E-4D11-8776-F3613A27F6B9}"
 	ProjectSection(SolutionItems) = preProject
 		Lib\Shock.Logger.dll = Lib\Shock.Logger.dll
+		Lib\Shock.MarkovTextGenerator.dll = Lib\Shock.MarkovTextGenerator.dll
+		Lib\Shock.MarkovTextGenerator.Test.exe = Lib\Shock.MarkovTextGenerator.Test.exe
 		Lib\Skype4COM.dll = Lib\Skype4COM.dll
 		Lib\System.Data.SQLite.dll = Lib\System.Data.SQLite.dll
 	EndProjectSection

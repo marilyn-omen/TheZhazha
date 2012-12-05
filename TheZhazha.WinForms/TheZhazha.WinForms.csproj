@@ -182,11 +182,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="dictionary.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo.
@@ -196,8 +191,8 @@ echo   Creating output:
 echo _________________________
 if exist "$(SolutionDir)Output" rd "$(SolutionDir)Output" /s /q
 echo d|xcopy "$(TargetDir)*.dll" "$(SolutionDir)Output" /y
+echo d|xcopy "$(SolutionDir)Lib\*.exe" "$(SolutionDir)Output" /y
 echo d|xcopy "$(TargetPath)" "$(SolutionDir)Output" /y
-echo d|xcopy "$(TargetDir)dictionary.txt" "$(SolutionDir)Output" /y
 echo d|xcopy "$(TargetDir)Data" "$(SolutionDir)Output\Data" /y
 echo.
 echo   Done.
