@@ -141,7 +141,10 @@ namespace TheZhazha.Models
                     break;
                 case TChatMessageType.cmeSaid:
                 case TChatMessageType.cmeEmoted:
-                    AccumulateDictionary(message);
+                    if (Settings.Instance.Get(message.ChatName).IsSaveLogEnabled)
+                    {
+                        AccumulateDictionary(message);
+                    }
                     Respond(message);
                     break;
             }

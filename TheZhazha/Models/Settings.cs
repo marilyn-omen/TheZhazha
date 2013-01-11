@@ -71,6 +71,7 @@ namespace TheZhazha.Models
         private bool _isReplyEnabled = false;
         private bool _isVbrosEnabled = false;
         private bool _isBabkaEnabled = false;
+        private bool _isSaveLogEnabled = false;
         
         #endregion
 
@@ -115,6 +116,18 @@ namespace TheZhazha.Models
             }
         }
 
+        public bool IsSaveLogEnabled
+        {
+            get { return _isSaveLogEnabled; }
+            set
+            {
+                if (_isSaveLogEnabled == value)
+                    return;
+                _isSaveLogEnabled = value;
+                Save();
+            }
+        }
+
         #endregion
 
         public SettingsEntry(string chat)
@@ -128,12 +141,13 @@ namespace TheZhazha.Models
             Id = id;
         }
 
-        public SettingsEntry(string chat, long id, bool reply, bool vbros, bool babka)
+        public SettingsEntry(string chat, long id, bool reply, bool vbros, bool babka, bool savelog)
             : this(chat, id)
         {
             _isReplyEnabled = reply;
             _isVbrosEnabled = vbros;
             _isBabkaEnabled = babka;
+            _isSaveLogEnabled = savelog;
         }
 
         public void SetId(long value)

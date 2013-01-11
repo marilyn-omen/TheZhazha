@@ -347,7 +347,8 @@ namespace TheZhazha.Data
                     reader.GetInt64(reader.GetOrdinal("id")),
                     reader.GetBoolean(reader.GetOrdinal("reply")),
                     reader.GetBoolean(reader.GetOrdinal("vbros")),
-                    reader.GetBoolean(reader.GetOrdinal("babka")))
+                    reader.GetBoolean(reader.GetOrdinal("babka")),
+                    reader.GetBoolean(reader.GetOrdinal("savelog")))
                 );
             }
             cmd.Dispose();
@@ -357,8 +358,8 @@ namespace TheZhazha.Data
 
         public static void UpdateSettings(SettingsEntry entry)
         {
-            const string insertSql = "insert into settings (chat, reply, vbros, babka) values (@chat, @reply, @vbros, @babka)";
-            const string updateSql = "update settings set reply=@reply, vbros=@vbros, babka=@babka where id=@id";
+            const string insertSql = "insert into settings (chat, reply, vbros, babka, savelog) values (@chat, @reply, @vbros, @babka, @savelog)";
+            const string updateSql = "update settings set reply=@reply, vbros=@vbros, babka=@babka, savelog=@savelog where id=@id";
             const string getIdSql = "select last_insert_rowid() from settings";
             var cmd = new SQLiteCommand();
             cmd.Connection = _connection;
@@ -373,6 +374,7 @@ namespace TheZhazha.Data
                 cmd.Parameters.AddWithValue("@reply", entry.IsReplyEnabled);
                 cmd.Parameters.AddWithValue("@vbros", entry.IsVbrosEnabled);
                 cmd.Parameters.AddWithValue("@babka", entry.IsBabkaEnabled);
+                cmd.Parameters.AddWithValue("@savelog", entry.IsSaveLogEnabled);
 
                 try
                 {
@@ -398,6 +400,7 @@ namespace TheZhazha.Data
                 cmd.Parameters.AddWithValue("@reply", entry.IsReplyEnabled);
                 cmd.Parameters.AddWithValue("@vbros", entry.IsVbrosEnabled);
                 cmd.Parameters.AddWithValue("@babka", entry.IsBabkaEnabled);
+                cmd.Parameters.AddWithValue("@savelog", entry.IsSaveLogEnabled);
                 cmd.Parameters.AddWithValue("@id", entry.Id);
 
                 try

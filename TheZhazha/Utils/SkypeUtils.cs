@@ -38,7 +38,8 @@ namespace TheZhazha.Utils
 
         public static string GetFsSafeName(string chatName)
         {
-            var invalidSymbols = System.IO.Path.GetInvalidFileNameChars();
+            var invalidSymbols = new List<char>(System.IO.Path.GetInvalidFileNameChars());
+            invalidSymbols.Add(';');
             return invalidSymbols.Aggregate(chatName, (current, symbol) => current.Replace(symbol, '_'));
         }
 

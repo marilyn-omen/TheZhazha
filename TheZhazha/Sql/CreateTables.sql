@@ -53,5 +53,6 @@ CREATE TABLE IF NOT EXISTS
         chat VARCHAR NOT NULL,
         reply INTEGER NOT NULL,
         vbros INTEGER NOT NULL,
-        babka INTEGER NOT NULL
+        babka INTEGER NOT NULL,
+        savelog INTEGER NOT NULL
     );
