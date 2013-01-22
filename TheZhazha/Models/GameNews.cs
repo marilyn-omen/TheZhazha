@@ -43,7 +43,7 @@ namespace TheZhazha.Models
                         _isLoading = false;
                         callback(sb.ToString());
                     }
-                );
+                ).LogExceptions();
         }
     }
 }

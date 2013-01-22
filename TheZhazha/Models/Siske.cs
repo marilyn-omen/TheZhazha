@@ -52,7 +52,7 @@ namespace TheZhazha.Models
                         callback(response);
                         _isLoading = false;
                     }
-                );
+                ).LogExceptions();
         }
 
         private static string DoLoad()

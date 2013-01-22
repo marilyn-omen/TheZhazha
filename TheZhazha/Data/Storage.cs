@@ -6,6 +6,7 @@ using System.IO;
 using System.Resources;
 using TheZhazha.Models;
 using System.Collections.Generic;
+using Shock.Logger;
 
 namespace TheZhazha.Data
 {
@@ -344,7 +345,7 @@ namespace TheZhazha.Data
             {
                 result.Add(new SettingsEntry(
                     reader.GetString(reader.GetOrdinal("chat")),
-                    reader.GetInt64(reader.GetOrdinal("id")),
+                    reader.GetInt16(reader.GetOrdinal("id")),
                     reader.GetBoolean(reader.GetOrdinal("reply")),
                     reader.GetBoolean(reader.GetOrdinal("vbros")),
                     reader.GetBoolean(reader.GetOrdinal("babka")),
@@ -424,8 +425,22 @@ namespace TheZhazha.Data
 
         private static void PrepareConnection()
         {
-            _connection = new SQLiteConnection(GetConnectionString());
-            ValidateTables();
+            try
+            {
+                _connection = new SQLiteConnection(GetConnectionString());
+            }
+            catch(Exception ex)
+            {
+                LoggerFacade.Log(ex.Message);
+            }
+            try
+            {
+                ValidateTables();
+            }
+            catch(Exception ex)
+            {
+                LoggerFacade.Log(ex.Message);
+            }
         }
 
         private static void ValidateTables()

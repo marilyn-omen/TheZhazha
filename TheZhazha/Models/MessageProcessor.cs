@@ -64,7 +64,7 @@ namespace TheZhazha.Models
                         }
                     },
                 ct
-                );
+                ).LogExceptions();
         }
 
         #endregion
@@ -152,7 +152,7 @@ namespace TheZhazha.Models
 
         private void AccumulateDictionary(IChatMessage message)
         {
-            Generator.FeedDictionary(SkypeUtils.GetFsSafeName(message.ChatName), message.Body);
+            Generator.FeedDictionary(SkypeUtils.GetFsSafeName(message.ChatName), SkypeUtils.RemoveSmilies(message.Body));
         }
 
         private void ProcessQuot(ChatMessage message)
@@ -370,7 +370,10 @@ namespace TheZhazha.Models
                     Send(message.Chat, SkypeUtils.ReturnSmilies(Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName))));
                     break;
                 default:
-                    Send(message.Chat, SkypeUtils.ReturnSmilies(Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName))));
+                    if (Settings.Instance.Get(message.ChatName).IsVbrosEnabled)
+                    {
+                        Send(message.Chat, SkypeUtils.ReturnSmilies(Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName))));
+                    }
                     break;
             }
         }
@@ -394,7 +397,7 @@ namespace TheZhazha.Models
             else if (Settings.Instance.Get(message.ChatName).IsVbrosEnabled
                 && Zhazha.Rnd.NextDouble() < 0.04)
             {
-                response = Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName));
+                response = SkypeUtils.ReturnSmilies(Generator.Generate(SkypeUtils.GetFsSafeName(message.ChatName)));
             }
             else if(Settings.Instance.Get(message.ChatName).IsReplyEnabled)
             {
